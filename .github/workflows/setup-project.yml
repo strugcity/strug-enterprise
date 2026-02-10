@@ -1,0 +1,784 @@
+name: Setup GitHub Project
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "setup" to confirm you want to create all labels, milestones, and issues'
+        required: true
+        default: ''
+
+permissions:
+  issues: write
+  repository-projects: write
+
+jobs:
+  setup:
+    if: github.event.inputs.confirm == 'setup'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm
+        run: echo "Setting up Strug City project management structure..."
+
+      # =====================================================================
+      # Step 1: Clean default labels and create custom ones
+      # =====================================================================
+      - name: Delete default labels
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for label in "bug" "documentation" "duplicate" "enhancement" "good first issue" "help wanted" "invalid" "question" "wontfix"; do
+            gh label delete "$label" --repo ${{ github.repository }} --yes 2>/dev/null || true
+          done
+
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+
+          # Agent labels
+          gh label create "agent:claude-code"  --color "d1287c" --description "Assigned to Claude Code — orchestration, architecture, QA" --repo "$REPO" --force
+          gh label create "agent:copilot"      --color "00ffdd" --description "Assigned to GitHub Copilot — core coding, patterns" --repo "$REPO" --force
+          gh label create "agent:vertex-ai"    --color "8b5cf6" --description "Assigned to Vertex AI — content generation, supplementary coding" --repo "$REPO" --force
+
+          # Type labels
+          gh label create "type:architecture" --color "2071f5" --description "Architecture and system design" --repo "$REPO" --force
+          gh label create "type:feature"      --color "00e87b" --description "New feature implementation" --repo "$REPO" --force
+          gh label create "type:content"      --color "23d1fc" --description "Content creation and population" --repo "$REPO" --force
+          gh label create "type:config"       --color "f0f0f5" --description "Configuration and setup" --repo "$REPO" --force
+          gh label create "type:qa"           --color "d1287c" --description "Review, testing, QA" --repo "$REPO" --force
+
+          # Priority labels
+          gh label create "priority:critical-path" --color "ff0000" --description "Blocks other work — must be done first" --repo "$REPO" --force
+          gh label create "priority:high"          --color "ff6600" --description "Important, do soon" --repo "$REPO" --force
+          gh label create "priority:medium"        --color "ffcc00" --description "Standard priority" --repo "$REPO" --force
+
+          # Stream labels
+          gh label create "stream:1-cms-setup"        --color "d1287c" --description "Stream 1 — Sanity CMS foundation" --repo "$REPO" --force
+          gh label create "stream:2-page-conversion"  --color "00ffdd" --description "Stream 2 — Convert pages to CMS" --repo "$REPO" --force
+          gh label create "stream:3-content"          --color "8b5cf6" --description "Stream 3 — Content population" --repo "$REPO" --force
+          gh label create "stream:4-integrations"     --color "2071f5" --description "Stream 4 — Workflow integrations" --repo "$REPO" --force
+          gh label create "stream:5-deploy"           --color "00e87b" --description "Stream 5 — Deploy and polish" --repo "$REPO" --force
+
+          echo "✅ Labels created"
+
+      # =====================================================================
+      # Step 2: Create milestones
+      # =====================================================================
+      - name: Create milestones
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+
+          gh api repos/$REPO/milestones --method POST \
+            -f title="Stream 1: Sanity CMS Foundation" \
+            -f description="Install packages, create Sanity client config, define content schemas, set up Sanity Studio, write GROQ queries. This is the critical path — all other streams depend on it." \
+            -f state="open" --silent 2>/dev/null || echo "Milestone may already exist"
+
+          gh api repos/$REPO/milestones --method POST \
+            -f title="Stream 2: Page Conversion" \
+            -f description="Convert all pages from static data to Sanity-fetched content. Products, Progress Stream, Blog, Home featured sections, and individual blog post pages." \
+            -f state="open" --silent 2>/dev/null || echo "Milestone may already exist"
+
+          gh api repos/$REPO/milestones --method POST \
+            -f title="Stream 3: Content Population" \
+            -f description="Seed data scripts, full blog articles, extended progress stream history. Runs in parallel with Stream 1." \
+            -f state="open" --silent 2>/dev/null || echo "Milestone may already exist"
+
+          gh api repos/$REPO/milestones --method POST \
+            -f title="Stream 4: Workflow Integration" \
+            -f description="Webhook API routes for GitHub events, generic stream entry API, GitHub Actions for auto-posting, project management integration." \
+            -f state="open" --silent 2>/dev/null || echo "Milestone may already exist"
+
+          gh api repos/$REPO/milestones --method POST \
+            -f title="Stream 5: Deploy & Polish" \
+            -f description="Vercel environment config, RSS feed, sitemap, Open Graph images, final build verification and deploy." \
+            -f state="open" --silent 2>/dev/null || echo "Milestone may already exist"
+
+          echo "✅ Milestones created"
+
+      # =====================================================================
+      # Step 3: Create all 25 issues
+      # =====================================================================
+
+      # --- Stream 1: Sanity CMS Foundation ---
+      - name: "Issue: [1a] Install Sanity dependencies"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[1a] Install Sanity dependencies" \
+            --milestone "Stream 1: Sanity CMS Foundation" \
+            --label "agent:claude-code,type:config,priority:critical-path,stream:1-cms-setup" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Install `next-sanity`, `@sanity/image-url`, and `sanity` packages.
+
+          ## Acceptance Criteria
+          - [ ] `next-sanity` installed and in package.json
+          - [ ] `@sanity/image-url` installed and in package.json
+          - [ ] `sanity` installed and in package.json
+          - [ ] `npm run build` passes after installation
+          - [ ] No version conflicts with existing Next.js 16 setup
+
+          ## Dependencies
+          None — this is the first task.
+
+          ## Agent: **Claude Code** — Package orchestration, dependency resolution.
+          EOF
+          )"
+
+      - name: "Issue: [1b] Create Sanity client configuration"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[1b] Create Sanity client configuration" \
+            --milestone "Stream 1: Sanity CMS Foundation" \
+            --label "agent:claude-code,type:config,priority:critical-path,stream:1-cms-setup" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Create the Sanity client configuration at `src/lib/sanity.ts` with support for production client, preview client, and environment variable configuration.
+
+          ## Acceptance Criteria
+          - [ ] `src/lib/sanity.ts` created with typed client exports
+          - [ ] Environment variables: `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET`, `SANITY_API_TOKEN`
+          - [ ] `.env.local.example` file created
+          - [ ] Client supports both server-side and client-side usage
+          - [ ] TypeScript types are correct
+
+          ## Dependencies
+          Blocked by: [1a] Install Sanity dependencies
+
+          ## Agent: **Claude Code** — Needs to wire env vars, client setup, and preview mode correctly.
+          EOF
+          )"
+
+      - name: "Issue: [1c] Define Sanity content schemas"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[1c] Define Sanity content schemas" \
+            --milestone "Stream 1: Sanity CMS Foundation" \
+            --label "agent:vertex-ai,type:config,priority:critical-path,stream:1-cms-setup" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Define Sanity content schemas for all content types:
+          1. **blogPost** — title, slug, body (portable text), excerpt, author, category, publishedAt, readTime, featured image
+          2. **streamEntry** — title, description, type (milestone/release/engineering/research/announcement), tags, timestamp
+          3. **product** — name, slug, description, status, features (array), tags, accentColor, order
+
+          ## Acceptance Criteria
+          - [ ] All three schemas defined with proper field types
+          - [ ] Schemas use TypeScript
+          - [ ] Portable Text configured for blog body
+          - [ ] Slug fields auto-generate from title/name
+          - [ ] Enum fields for type/status/category
+          - [ ] Schema index exports all schemas
+
+          ## Dependencies
+          Blocked by: [1a]. Can run in parallel with [1b].
+
+          ## Agent: **Vertex AI** — Schema definitions are well-structured, repetitive — good use of Google credits.
+          EOF
+          )"
+
+      - name: "Issue: [1d] Set up Sanity Studio at /studio"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[1d] Set up Sanity Studio at /studio" \
+            --milestone "Stream 1: Sanity CMS Foundation" \
+            --label "agent:claude-code,type:feature,priority:critical-path,stream:1-cms-setup" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Embed Sanity Studio into the Next.js app at the `/studio` route.
+
+          ## Acceptance Criteria
+          - [ ] Sanity Studio accessible at `/studio`
+          - [ ] Studio loads all defined schemas
+          - [ ] Studio uses Strug City color palette for branding
+          - [ ] Route excluded from main site layout (no navbar/footer)
+          - [ ] `sanity.config.ts` created at project root
+          - [ ] `npm run build` passes
+
+          ## Dependencies
+          Blocked by: [1c] Content schemas
+
+          ## Agent: **Claude Code** — Next.js App Router + Sanity Studio integration is architecture-sensitive.
+          EOF
+          )"
+
+      - name: "Issue: [1e] Create GROQ queries"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[1e] Create GROQ queries for all content types" \
+            --milestone "Stream 1: Sanity CMS Foundation" \
+            --label "agent:claude-code,type:feature,priority:high,stream:1-cms-setup" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Create typed GROQ queries in `src/lib/queries.ts`:
+          1. `getAllProducts` — ordered by `order` field
+          2. `getAllStreamEntries` — ordered by timestamp desc
+          3. `getLatestStreamEntries(limit)` — most recent N entries
+          4. `getAllBlogPosts` — ordered by publishedAt desc
+          5. `getBlogPostBySlug(slug)` — single post with full body
+          6. `getFeaturedProducts(limit)` — top N products for home page
+
+          ## Acceptance Criteria
+          - [ ] All queries defined in `src/lib/queries.ts`
+          - [ ] Each query has a corresponding TypeScript return type
+          - [ ] No over-fetching
+
+          ## Dependencies
+          Blocked by: [1b] Sanity client config, [1c] Content schemas
+
+          ## Agent: **Claude Code** — Needs full understanding of schemas + page data requirements.
+          EOF
+          )"
+
+      # --- Stream 2: Page Conversion ---
+      - name: "Issue: [2a] Convert Products page"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[2a] Convert Products page to fetch from Sanity" \
+            --milestone "Stream 2: Page Conversion" \
+            --label "agent:copilot,type:feature,priority:high,stream:2-page-conversion" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Replace static product data in `src/app/products/page.tsx` with Sanity-fetched data.
+
+          ## Acceptance Criteria
+          - [ ] Products page fetches data from Sanity at build time
+          - [ ] All fields render correctly (name, description, status, features, tags)
+          - [ ] Accent colors driven by `accentColor` field from Sanity
+          - [ ] `npm run build` passes
+          - [ ] Fallback state if no products exist
+
+          ## Dependencies
+          Blocked by: Stream 1 complete (especially [1e] GROQ queries)
+
+          ## Agent: **Copilot** — Pattern: replace static array → async fetch + render.
+          EOF
+          )"
+
+      - name: "Issue: [2b] Convert Progress Stream page"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[2b] Convert Progress Stream page to fetch from Sanity" \
+            --milestone "Stream 2: Page Conversion" \
+            --label "agent:copilot,type:feature,priority:high,stream:2-page-conversion" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Replace static stream data in `src/app/stream/page.tsx` with Sanity-fetched data. Group entries by date.
+
+          ## Acceptance Criteria
+          - [ ] Stream page fetches entries from Sanity
+          - [ ] Entries grouped by date
+          - [ ] Type badges and colors render correctly
+          - [ ] Tags display properly
+          - [ ] Page builds successfully
+
+          ## Dependencies
+          Blocked by: Stream 1 complete
+
+          ## Agent: **Copilot** — Same pattern as [2a], date grouping is main complexity.
+          EOF
+          )"
+
+      - name: "Issue: [2c] Convert Blog page"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[2c] Convert Blog page to fetch from Sanity" \
+            --milestone "Stream 2: Page Conversion" \
+            --label "agent:copilot,type:feature,priority:high,stream:2-page-conversion" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Replace static blog data in `src/app/blog/page.tsx` with Sanity-fetched data.
+
+          ## Acceptance Criteria
+          - [ ] Blog listing fetches posts from Sanity
+          - [ ] All fields render (title, excerpt, category, date, readTime)
+          - [ ] Posts link to `/blog/[slug]`
+          - [ ] Page builds successfully
+
+          ## Dependencies
+          Blocked by: Stream 1 complete
+
+          ## Agent: **Copilot** — Same pattern as [2a]/[2b].
+          EOF
+          )"
+
+      - name: "Issue: [2d] Convert Home page featured sections"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[2d] Convert Home page featured sections to fetch from Sanity" \
+            --milestone "Stream 2: Page Conversion" \
+            --label "agent:copilot,type:feature,priority:high,stream:2-page-conversion" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Replace static featured products and latest updates on `src/app/page.tsx` with Sanity data.
+
+          ## Acceptance Criteria
+          - [ ] Featured products section fetches from Sanity (limit 3)
+          - [ ] Latest updates section fetches from Sanity (limit 3)
+          - [ ] All existing styling preserved
+          - [ ] Page builds successfully
+
+          ## Dependencies
+          Blocked by: Stream 1 complete
+
+          ## Agent: **Copilot** — Two queries on same page, same pattern.
+          EOF
+          )"
+
+      - name: "Issue: [2e] Build blog post page"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[2e] Build individual blog post page (/blog/[slug])" \
+            --milestone "Stream 2: Page Conversion" \
+            --label "agent:copilot,type:feature,priority:high,stream:2-page-conversion" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Create dynamic route at `src/app/blog/[slug]/page.tsx` for individual blog posts.
+
+          ## Acceptance Criteria
+          - [ ] Dynamic route renders blog post by slug
+          - [ ] Portable Text body renders correctly (headings, paragraphs, code blocks, links, images)
+          - [ ] Page metadata set from post data
+          - [ ] Back link to blog listing
+          - [ ] 404 handling for invalid slugs
+          - [ ] `generateStaticParams` for static generation
+
+          ## Dependencies
+          Blocked by: Stream 1, [2c] Blog listing
+
+          ## Agent: **Copilot** — May need `@portabletext/react` package.
+          EOF
+          )"
+
+      - name: "Issue: [2f] PR Review page conversions"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[2f] PR Review: All page conversions" \
+            --milestone "Stream 2: Page Conversion" \
+            --label "agent:claude-code,type:qa,priority:high,stream:2-page-conversion" \
+            --body "$(cat <<'EOF'
+          ## Review Checklist
+          - [ ] All GROQ queries are correct and efficient
+          - [ ] TypeScript types match Sanity schemas
+          - [ ] Error handling for missing/null data
+          - [ ] Build passes with `npm run build`
+          - [ ] No hardcoded content remaining
+          - [ ] Portable Text handles all block types
+          - [ ] SEO metadata correctly set from CMS
+          - [ ] No regressions in styling
+
+          ## Dependencies
+          Blocked by: [2a]–[2e]
+
+          ## Agent: **Claude Code** — QA pass.
+          EOF
+          )"
+
+      # --- Stream 3: Content Population ---
+      - name: "Issue: [3a] Create seed data script"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[3a] Create Sanity seed data script" \
+            --milestone "Stream 3: Content Population" \
+            --label "agent:vertex-ai,type:content,priority:high,stream:3-content" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Create `scripts/seed-sanity.ts` that populates Sanity with initial content: 4 products, 20+ stream entries, 5 blog posts.
+
+          ## Acceptance Criteria
+          - [ ] Script creates all products with correct fields
+          - [ ] Script creates stream entries with varied types
+          - [ ] Script creates blog posts with Portable Text bodies
+          - [ ] Idempotent (can re-run without duplicating)
+          - [ ] Uses Sanity mutation API
+
+          ## Dependencies
+          Blocked by: [1c] Content schemas
+
+          ## Agent: **Vertex AI** — Bulk content generation.
+          EOF
+          )"
+
+      - name: "Issue: [3b] Generate blog articles"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[3b] Generate full blog article content (5 articles)" \
+            --milestone "Stream 3: Content Population" \
+            --label "agent:vertex-ai,type:content,priority:medium,stream:3-content" \
+            --body "$(cat <<'EOF'
+          ## Articles (800–1500 words each)
+          1. "Why We Build in the Open"
+          2. "Multi-Agent Orchestration: Patterns That Actually Work"
+          3. "Designing for AI-Native Developer Experience"
+          4. "Vector Search at Scale: Lessons from Building Glacier DB"
+          5. "From Minnesota to the Cloud: The Strug City Origin Story"
+
+          ## Acceptance Criteria
+          - [ ] Each article 800–1500 words, substantive and technically credible
+          - [ ] Portable Text-compatible structure
+          - [ ] Consistent brand voice
+          - [ ] Compelling excerpts
+
+          ## Agent: **Vertex AI** — Long-form writing at scale.
+          EOF
+          )"
+
+      - name: "Issue: [3c] Generate stream history"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[3c] Generate extended progress stream history (20+ entries)" \
+            --milestone "Stream 3: Content Population" \
+            --label "agent:vertex-ai,type:content,priority:medium,stream:3-content" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Generate 20+ progress stream entries spanning Jan–Feb 2026 telling Strug City's development story.
+
+          ## Entry types: milestones, releases, engineering, research, announcements
+
+          ## Acceptance Criteria
+          - [ ] 20+ entries with realistic dates
+          - [ ] Mix of all entry types
+          - [ ] Chronologically coherent
+          - [ ] Each has title, description, type, 1–3 tags
+
+          ## Agent: **Vertex AI** — Structured data generation.
+          EOF
+          )"
+
+      - name: "Issue: [3d] Review seed data"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[3d] Review seed data for consistency and brand voice" \
+            --milestone "Stream 3: Content Population" \
+            --label "agent:claude-code,type:qa,priority:high,stream:3-content" \
+            --body "$(cat <<'EOF'
+          ## Review Checklist
+          - [ ] Product descriptions are accurate and compelling
+          - [ ] Blog articles are technically credible
+          - [ ] Stream entries tell coherent story chronologically
+          - [ ] Brand voice is consistent (technical but approachable)
+          - [ ] No contradictions between content pieces
+          - [ ] Dates and timelines internally consistent
+          - [ ] Tags and categories used consistently
+
+          ## Dependencies
+          Blocked by: [3a]–[3c]
+
+          ## Agent: **Claude Code** — Editorial QA, brand voice consistency.
+          EOF
+          )"
+
+      # --- Stream 4: Workflow Integration ---
+      - name: "Issue: [4a] Design webhook architecture"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[4a] Design webhook API route architecture" \
+            --milestone "Stream 4: Workflow Integration" \
+            --label "agent:claude-code,type:architecture,priority:high,stream:4-integrations" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Design architecture for webhook-driven content automation: API route structure, auth/signature verification, payload mapping, error handling.
+
+          ## Deliverables
+          - [ ] Architecture document
+          - [ ] API route file structure
+          - [ ] Security model (webhook signature verification)
+          - [ ] Rate limiting approach
+
+          ## Dependencies
+          Blocked by: Stream 1 complete
+
+          ## Agent: **Claude Code** — Architecture design, security-critical decisions.
+          EOF
+          )"
+
+      - name: "Issue: [4b] Build GitHub webhook handler"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[4b] Build GitHub webhook handler (/api/webhooks/github)" \
+            --milestone "Stream 4: Workflow Integration" \
+            --label "agent:claude-code,type:feature,priority:high,stream:4-integrations" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Next.js API route receiving GitHub webhooks, auto-creating stream entries in Sanity.
+
+          ## Events: `release`, `pull_request` (merged + `stream-worthy` label), `deployment_status` (success)
+
+          ## Acceptance Criteria
+          - [ ] API route at `/api/webhooks/github`
+          - [ ] GitHub webhook signature verification (HMAC SHA-256)
+          - [ ] Correct Sanity document creation per event type
+          - [ ] Auto-generated title, description, tags from payload
+          - [ ] Proper HTTP status codes and error logging
+
+          ## Dependencies
+          Blocked by: [4a] Architecture design
+
+          ## Agent: **Claude Code** — Security-critical: webhook signature verification.
+          EOF
+          )"
+
+      - name: "Issue: [4c] Build stream entry API"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[4c] Build generic stream entry API (/api/stream)" \
+            --milestone "Stream 4: Workflow Integration" \
+            --label "agent:copilot,type:feature,priority:high,stream:4-integrations" \
+            --body "$(cat <<'EOF'
+          ## Description
+          General-purpose API for creating stream entries from any source (CLI, Slack, other integrations).
+
+          ## Acceptance Criteria
+          - [ ] POST `/api/stream` creates Sanity stream entry
+          - [ ] JSON body: `{ title, description, type, tags }`
+          - [ ] Bearer token authentication
+          - [ ] Input validation
+          - [ ] Returns created document ID
+          - [ ] Rate limiting
+
+          ## Dependencies
+          Blocked by: [4a] Architecture, pattern from [4b]
+
+          ## Agent: **Copilot** — Follows pattern from GitHub webhook handler.
+          EOF
+          )"
+
+      - name: "Issue: [4d] Build GitHub Action for stream posts"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[4d] Build GitHub Action for auto-posting stream entries" \
+            --milestone "Stream 4: Workflow Integration" \
+            --label "agent:vertex-ai,type:feature,priority:medium,stream:4-integrations" \
+            --body "$(cat <<'EOF'
+          ## Description
+          Reusable GitHub Action at `.github/workflows/stream-post.yml`.
+
+          ## Triggers: release published, PR merged with `stream-worthy` label, manual dispatch
+
+          ## Acceptance Criteria
+          - [ ] Workflow file created
+          - [ ] Posts to stream API endpoint
+          - [ ] Uses repository secrets for API token
+          - [ ] Manual dispatch with custom title/description inputs
+          - [ ] Dry-run option
+
+          ## Dependencies
+          Blocked by: [4c] Stream entry API
+
+          ## Agent: **Vertex AI** — YAML workflow generation.
+          EOF
+          )"
+
+      - name: "Issue: [4e] PR Review API routes"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[4e] PR Review: All API routes (security audit)" \
+            --milestone "Stream 4: Workflow Integration" \
+            --label "agent:claude-code,type:qa,priority:high,stream:4-integrations" \
+            --body "$(cat <<'EOF'
+          ## Security Review Checklist
+          - [ ] Webhook signature verification is correct and timing-safe
+          - [ ] No secrets exposed in client-side code
+          - [ ] Input validation on all endpoints
+          - [ ] Rate limiting configured
+          - [ ] Error responses don't leak internal details
+          - [ ] CORS configuration appropriate
+          - [ ] Environment variables documented
+          - [ ] GitHub Action secrets properly scoped
+
+          ## Dependencies
+          Blocked by: [4b]–[4d]
+
+          ## Agent: **Claude Code** — Security audit.
+          EOF
+          )"
+
+      # --- Stream 5: Deploy & Polish ---
+      - name: "Issue: [5a] Configure Vercel deployment"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[5a] Configure Vercel environment and deployment" \
+            --milestone "Stream 5: Deploy & Polish" \
+            --label "agent:claude-code,type:config,priority:high,stream:5-deploy" \
+            --body "$(cat <<'EOF'
+          ## Acceptance Criteria
+          - [ ] `vercel.json` configured if needed
+          - [ ] Environment variables documented for Vercel dashboard
+          - [ ] Preview deployments use draft Sanity content
+          - [ ] Production uses published Sanity content
+          - [ ] Custom domain configuration documented
+
+          ## Dependencies
+          Blocked by: Stream 1, Stream 2
+
+          ## Agent: **Claude Code** — Env var setup, preview vs production config.
+          EOF
+          )"
+
+      - name: "Issue: [5b] Add RSS feed"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[5b] Add RSS feed API route" \
+            --milestone "Stream 5: Deploy & Polish" \
+            --label "agent:copilot,type:feature,priority:medium,stream:5-deploy" \
+            --body "$(cat <<'EOF'
+          ## Acceptance Criteria
+          - [ ] `/feed.xml` returns valid RSS 2.0 for blog posts
+          - [ ] `/stream/feed.xml` for stream entries
+          - [ ] Includes title, description, link, pubDate
+          - [ ] Valid XML
+          - [ ] `<link>` tags in HTML head for feed discovery
+
+          ## Dependencies
+          Blocked by: Stream 2
+
+          ## Agent: **Copilot** — XML generation pattern.
+          EOF
+          )"
+
+      - name: "Issue: [5c] Add sitemap"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[5c] Add sitemap generation" \
+            --milestone "Stream 5: Deploy & Polish" \
+            --label "agent:copilot,type:feature,priority:medium,stream:5-deploy" \
+            --body "$(cat <<'EOF'
+          ## Acceptance Criteria
+          - [ ] `src/app/sitemap.ts` generates from all routes
+          - [ ] Includes dynamic blog post URLs from Sanity
+          - [ ] Includes all static pages
+          - [ ] `robots.txt` references sitemap
+          - [ ] Valid XML format
+
+          ## Dependencies
+          Blocked by: Stream 2
+
+          ## Agent: **Copilot** — Standard Next.js pattern.
+          EOF
+          )"
+
+      - name: "Issue: [5d] Add OG images"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[5d] Add Open Graph image generation" \
+            --milestone "Stream 5: Deploy & Polish" \
+            --label "agent:vertex-ai,type:feature,priority:medium,stream:5-deploy" \
+            --body "$(cat <<'EOF'
+          ## Acceptance Criteria
+          - [ ] Default OG image with Strug City branding and aurora gradient
+          - [ ] Dynamic OG images for blog posts (title, category)
+          - [ ] Dynamic OG images for product pages
+          - [ ] Correct meta tags
+          - [ ] Renders correctly on Twitter/LinkedIn
+
+          ## Dependencies
+          Blocked by: Stream 2
+
+          ## Agent: **Vertex AI** — Image template design.
+          EOF
+          )"
+
+      - name: "Issue: [5e] Final QA and deploy"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo ${{ github.repository }} \
+            --title "[5e] Final build verification and deploy" \
+            --milestone "Stream 5: Deploy & Polish" \
+            --label "agent:claude-code,type:qa,priority:high,stream:5-deploy" \
+            --body "$(cat <<'EOF'
+          ## Final Checklist
+          - [ ] `npm run build` passes with zero errors
+          - [ ] All pages render correctly with CMS data
+          - [ ] Sanity Studio is accessible and functional
+          - [ ] API routes respond correctly
+          - [ ] RSS feeds are valid
+          - [ ] Sitemap is valid
+          - [ ] OG images render correctly
+          - [ ] Mobile responsive on all pages
+          - [ ] Performance audit (Lighthouse score)
+          - [ ] Deploy to Vercel production
+          - [ ] Custom domain configured and working
+          - [ ] SSL certificate active
+
+          ## Dependencies
+          Blocked by: All previous streams
+
+          ## Agent: **Claude Code** — Final QA and deploy orchestration.
+          EOF
+          )"
+
+      # =====================================================================
+      # Step 4: Summary
+      # =====================================================================
+      - name: Summary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo ""
+          echo "================================================"
+          echo "  ✅ Strug City Project Setup Complete!"
+          echo "================================================"
+          echo ""
+          echo "Created:"
+          ISSUE_COUNT=$(gh issue list --repo ${{ github.repository }} --state open --limit 100 --json number -q 'length')
+          LABEL_COUNT=$(gh label list --repo ${{ github.repository }} --json name -q 'length')
+          MILESTONE_COUNT=$(gh api repos/${{ github.repository }}/milestones --jq 'length')
+          echo "  - $LABEL_COUNT labels"
+          echo "  - $MILESTONE_COUNT milestones"
+          echo "  - $ISSUE_COUNT issues"
+          echo ""
+          echo "Next: Create a Project board at https://github.com/orgs/strugcity/projects/new"
+          echo "and add all issues to it."
