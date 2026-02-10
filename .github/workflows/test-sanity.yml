@@ -1,0 +1,87 @@
+name: Test Sanity Connection
+
+on:
+  workflow_dispatch: # Manual trigger only
+  pull_request:
+    paths:
+      - 'src/lib/sanity.ts'
+      - 'src/lib/queries.ts'
+      - '.github/workflows/test-sanity.yml'
+
+jobs:
+  test-connection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Test Sanity API connectivity
+        env:
+          PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
+        run: |
+          echo "Testing Sanity connection..."
+          echo "Project ID: ${PROJECT_ID}"
+          echo "Dataset: ${DATASET}"
+
+          # Test CDN endpoint
+          echo ""
+          echo "1. Testing CDN endpoint:"
+          CDN_URL="https://${PROJECT_ID}.apicdn.sanity.io/v2021-10-21/data/query/${DATASET}?query=*%5B_type%20%3D%3D%20%22blogPost%22%5D%5B0%5D"
+          echo "   URL: ${CDN_URL}"
+
+          CDN_RESPONSE=$(curl -s -w "\n%{http_code}" "${CDN_URL}")
+          CDN_CODE=$(echo "$CDN_RESPONSE" | tail -n1)
+          CDN_BODY=$(echo "$CDN_RESPONSE" | head -n-1)
+
+          if [ "$CDN_CODE" = "200" ]; then
+            echo "   ✅ CDN endpoint: HTTP ${CDN_CODE}"
+          else
+            echo "   ❌ CDN endpoint: HTTP ${CDN_CODE}"
+            echo "   Response: ${CDN_BODY}"
+            exit 1
+          fi
+
+          # Test API endpoint
+          echo ""
+          echo "2. Testing API endpoint:"
+          API_URL="https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=*%5B_type%20%3D%3D%20%22blogPost%22%5D%5B0%5D"
+          echo "   URL: ${API_URL}"
+
+          API_RESPONSE=$(curl -s -w "\n%{http_code}" "${API_URL}")
+          API_CODE=$(echo "$API_RESPONSE" | tail -n1)
+          API_BODY=$(echo "$API_RESPONSE" | head -n-1)
+
+          if [ "$API_CODE" = "200" ]; then
+            echo "   ✅ API endpoint: HTTP ${API_CODE}"
+          else
+            echo "   ❌ API endpoint: HTTP ${API_CODE}"
+            echo "   Response: ${API_BODY}"
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ All Sanity endpoints accessible!"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test Next.js build with Sanity
+        env:
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
+        run: |
+          echo "Building Next.js with Sanity integration..."
+          npm run build
+
+          if [ $? -eq 0 ]; then
+            echo "✅ Build successful!"
+          else
+            echo "❌ Build failed!"
+            exit 1
+          fi
