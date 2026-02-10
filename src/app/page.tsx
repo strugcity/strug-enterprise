@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { client } from "@/lib/sanity";
-import { allProductsQuery, latestStreamEntriesQuery } from "@/lib/queries";
+import { featuredProductsQuery, latestStreamEntriesQuery } from "@/lib/queries";
 import type { Product, StreamEntry } from "@/lib/types";
 
 // Helper to format date like "Feb 10, 2026"
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) return "Date unavailable";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    return "Invalid Date";
+    console.warn(`Invalid date format received: ${dateString}`);
+    return "Date unavailable";
   }
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -56,21 +58,18 @@ const typeStyles: Record<string, string> = {
 };
 
 export default async function Home() {
-  let products: Product[] = [];
+  let featuredProducts: Product[] = [];
   let streamEntries: StreamEntry[] = [];
 
   // Fetch products and stream entries from Sanity
   try {
-    [products, streamEntries] = await Promise.all([
-      client.fetch<Product[]>(allProductsQuery),
+    [featuredProducts, streamEntries] = await Promise.all([
+      client.fetch<Product[]>(featuredProductsQuery),
       client.fetch<StreamEntry[]>(latestStreamEntriesQuery, { limit: 3 }),
     ]);
   } catch (error) {
     console.error("Error fetching data from Sanity:", error);
   }
-
-  // Limit products to first 3
-  const featuredProducts = products.slice(0, 3);
 
   return (
     <>
@@ -135,33 +134,41 @@ export default async function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {featuredProducts.map((product) => {
-              const colors = colorMap[product.accentColor];
-              return (
-                <Link
-                  key={product._id}
-                  href="/products"
-                  className={`group rounded-2xl border ${colors.border} bg-card/50 p-8 transition-all hover:bg-card-hover/50 ${colors.glow}`}
-                >
-                  <h3 className="text-xl font-semibold text-text-primary group-hover:text-white">
-                    {product.name}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-                    {product.description}
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {product.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${colors.tag}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              );
-            })}
+            {featuredProducts.length === 0 ? (
+              <div className="col-span-3 rounded-2xl border border-border bg-card/50 p-12 text-center">
+                <p className="text-lg text-text-secondary">
+                  No products available at the moment. Check back soon!
+                </p>
+              </div>
+            ) : (
+              featuredProducts.map((product) => {
+                const colors = colorMap[product.accentColor];
+                return (
+                  <Link
+                    key={product._id}
+                    href="/products"
+                    className={`group rounded-2xl border ${colors.border} bg-card/50 p-8 transition-all hover:bg-card-hover/50 ${colors.glow}`}
+                  >
+                    <h3 className="text-xl font-semibold text-text-primary group-hover:text-white">
+                      {product.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+                      {product.description}
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {product.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${colors.tag}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </div>
 
           <div className="mt-12 text-center">
@@ -199,31 +206,39 @@ export default async function Home() {
           </div>
 
           <div className="mx-auto max-w-3xl space-y-6">
-            {streamEntries.map((entry) => (
-              <div
-                key={entry._id}
-                className="glass-card rounded-2xl p-6 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      typeStyles[entry.type] ?? ""
-                    }`}
-                  >
-                    {entry.type}
-                  </span>
-                  <span className="text-xs text-text-muted">
-                    {formatDate(entry.publishedAt)}
-                  </span>
-                </div>
-                <h3 className="mt-3 text-lg font-semibold text-text-primary">
-                  {entry.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                  {entry.description}
+            {streamEntries.length === 0 ? (
+              <div className="rounded-2xl border border-border bg-card/50 p-12 text-center">
+                <p className="text-lg text-text-secondary">
+                  No updates available at the moment. Check back soon!
                 </p>
               </div>
-            ))}
+            ) : (
+              streamEntries.map((entry) => (
+                <div
+                  key={entry._id}
+                  className="glass-card rounded-2xl p-6 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        typeStyles[entry.type] ?? ""
+                      }`}
+                    >
+                      {entry.type}
+                    </span>
+                    <span className="text-xs text-text-muted">
+                      {formatDate(entry.publishedAt)}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-lg font-semibold text-text-primary">
+                    {entry.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                    {entry.description}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
 
           <div className="mt-12 text-center">
