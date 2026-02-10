@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { client } from "@/lib/sanity";
+import { allProductsQuery } from "@/lib/queries";
+import type { Product } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Products — Strug City",
@@ -7,86 +10,51 @@ export const metadata: Metadata = {
     "Explore the Strug City portfolio of AI-powered products and projects.",
 };
 
-const products = [
-  {
-    name: "Strug AI Platform",
-    status: "In Development",
-    description:
-      "An intelligent automation platform that leverages AI agents to streamline engineering workflows and boost team productivity. From code review to deployment orchestration, our platform handles the heavy lifting.",
-    features: [
-      "Multi-agent orchestration",
-      "Workflow automation",
-      "Intelligent code review",
-      "CI/CD integration",
-      "Custom agent creation",
-    ],
-    tags: ["AI Agents", "Automation", "Platform"],
-    accentColor: "aurora-pink",
-    glowClass: "glow-pink",
-    borderClass: "border-aurora-pink/30",
-    tagClass: "bg-aurora-pink/10 text-aurora-pink",
-    statusClass: "bg-aurora-pink/10 text-aurora-pink",
-  },
-  {
-    name: "Aurora Analytics",
-    status: "Beta",
-    description:
-      "Real-time analytics and insights engine built for modern data pipelines. Visualize, analyze, and act on your data with AI-powered pattern detection and anomaly alerts.",
-    features: [
-      "Real-time data streaming",
-      "AI anomaly detection",
-      "Custom dashboards",
-      "API-first architecture",
-      "Team collaboration",
-    ],
-    tags: ["Analytics", "Data", "Real-time"],
-    accentColor: "aurora-teal",
-    glowClass: "glow-teal",
-    borderClass: "border-aurora-teal/30",
-    tagClass: "bg-aurora-teal/10 text-aurora-teal",
-    statusClass: "bg-aurora-teal/10 text-aurora-teal",
-  },
-  {
-    name: "NorthStar SDK",
-    status: "Alpha",
-    description:
-      "A developer toolkit for building AI-native applications. Ship intelligent features faster with our composable, type-safe SDK. Works with any LLM provider.",
-    features: [
-      "Type-safe API",
-      "LLM provider agnostic",
-      "Composable primitives",
-      "Streaming support",
-      "Built-in observability",
-    ],
-    tags: ["SDK", "Developer Tools", "Open Source"],
-    accentColor: "aurora-purple",
-    glowClass: "glow-purple",
-    borderClass: "border-aurora-purple/30",
-    tagClass: "bg-aurora-purple/10 text-aurora-purple",
-    statusClass: "bg-aurora-purple/10 text-aurora-purple",
-  },
-  {
-    name: "Glacier DB",
-    status: "Research",
-    description:
-      "An experimental vector database optimized for AI workloads. Designed for speed, scale, and seamless integration with modern AI pipelines and retrieval-augmented generation.",
-    features: [
-      "Vector similarity search",
-      "Hybrid queries",
-      "Auto-indexing",
-      "RAG-optimized",
-      "Distributed architecture",
-    ],
-    tags: ["Database", "Vectors", "AI Infrastructure"],
-    accentColor: "aurora-blue",
-    glowClass: "glow-teal",
-    borderClass: "border-aurora-blue/30",
-    tagClass: "bg-aurora-blue/10 text-aurora-blue",
-    statusClass: "bg-aurora-blue/10 text-aurora-blue",
-  },
-];
+// Map accentColor to CSS classes
+function getColorClasses(accentColor: Product["accentColor"]) {
+  const colorMap = {
+    "aurora-pink": {
+      glowClass: "glow-pink",
+      borderClass: "border-aurora-pink/30",
+      tagClass: "bg-aurora-pink/10 text-aurora-pink",
+      statusClass: "bg-aurora-pink/10 text-aurora-pink",
+    },
+    "aurora-teal": {
+      glowClass: "glow-teal",
+      borderClass: "border-aurora-teal/30",
+      tagClass: "bg-aurora-teal/10 text-aurora-teal",
+      statusClass: "bg-aurora-teal/10 text-aurora-teal",
+    },
+    "aurora-purple": {
+      glowClass: "glow-purple",
+      borderClass: "border-aurora-purple/30",
+      tagClass: "bg-aurora-purple/10 text-aurora-purple",
+      statusClass: "bg-aurora-purple/10 text-aurora-purple",
+    },
+    "aurora-blue": {
+      glowClass: "glow-blue",
+      borderClass: "border-aurora-blue/30",
+      tagClass: "bg-aurora-blue/10 text-aurora-blue",
+      statusClass: "bg-aurora-blue/10 text-aurora-blue",
+    },
+    "aurora-green": {
+      glowClass: "glow-green",
+      borderClass: "border-aurora-green/30",
+      tagClass: "bg-aurora-green/10 text-aurora-green",
+      statusClass: "bg-aurora-green/10 text-aurora-green",
+    },
+    "aurora-cyan": {
+      glowClass: "glow-cyan",
+      borderClass: "border-aurora-cyan/30",
+      tagClass: "bg-aurora-cyan/10 text-aurora-cyan",
+      statusClass: "bg-aurora-cyan/10 text-aurora-cyan",
+    },
+  };
+  return colorMap[accentColor];
+}
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products: Product[] = await client.fetch(allProductsQuery);
   return (
     <>
       {/* Header */}
@@ -111,72 +79,83 @@ export default function ProductsPage() {
       {/* Product Cards */}
       <section className="py-16 md:py-24" id="featured">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="space-y-12">
-            {products.map((product, i) => (
-              <div
-                key={product.name}
-                className={`rounded-2xl border ${product.borderClass} bg-card/50 p-8 transition-all hover:bg-card-hover/50 ${product.glowClass} md:p-12`}
-              >
-                <div className="grid gap-8 md:grid-cols-2">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-2xl font-bold text-text-primary md:text-3xl">
-                        {product.name}
-                      </h2>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${product.statusClass}`}
-                      >
-                        {product.status}
-                      </span>
-                    </div>
-                    <p className="mt-4 text-base leading-relaxed text-text-secondary">
-                      {product.description}
-                    </p>
-                    <div className="mt-6 flex flex-wrap gap-2">
-                      {product.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${product.tagClass}`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-muted">
-                      Key Features
-                    </h3>
-                    <ul className="space-y-3">
-                      {product.features.map((feature) => (
-                        <li
-                          key={feature}
-                          className="flex items-center gap-3 text-sm text-text-secondary"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            className={`shrink-0 text-${product.accentColor}`}
+          {products.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card/50 p-12 text-center">
+              <p className="text-lg text-text-secondary">
+                No products available at the moment. Check back soon!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {products.map((product) => {
+                const colorClasses = getColorClasses(product.accentColor);
+                return (
+                  <div
+                    key={product._id}
+                    className={`rounded-2xl border ${colorClasses.borderClass} bg-card/50 p-8 transition-all hover:bg-card-hover/50 ${colorClasses.glowClass} md:p-12`}
+                  >
+                    <div className="grid gap-8 md:grid-cols-2">
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-2xl font-bold text-text-primary md:text-3xl">
+                            {product.name}
+                          </h2>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-medium ${colorClasses.statusClass}`}
                           >
-                            <path
-                              d="M4 8l3 3 5-6"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                            {product.status}
+                          </span>
+                        </div>
+                        <p className="mt-4 text-base leading-relaxed text-text-secondary">
+                          {product.description}
+                        </p>
+                        <div className="mt-6 flex flex-wrap gap-2">
+                          {product.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className={`rounded-full px-3 py-1 text-xs font-medium ${colorClasses.tagClass}`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-muted">
+                          Key Features
+                        </h3>
+                        <ul className="space-y-3">
+                          {product.features.map((feature) => (
+                            <li
+                              key={feature}
+                              className="flex items-center gap-3 text-sm text-text-secondary"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                className={`shrink-0 text-${product.accentColor}`}
+                              >
+                                <path
+                                  d="M4 8l3 3 5-6"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
