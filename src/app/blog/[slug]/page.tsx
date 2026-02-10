@@ -5,6 +5,7 @@ import { PortableText } from "@portabletext/react";
 import { client, urlFor } from "@/lib/sanity";
 import { blogPostBySlugQuery, allBlogPostsQuery } from "@/lib/queries";
 import type { BlogPost } from "@/lib/types";
+import { getCategoryColor, formatDate } from "@/lib/blog-utils";
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
@@ -38,34 +39,6 @@ export async function generateMetadata({
         }
       : undefined,
   };
-}
-
-// Map category to CSS classes (reused from listing page)
-function getCategoryColor(category: BlogPost["category"]) {
-  const categoryMap = {
-    Company: "bg-aurora-purple/10 text-aurora-purple",
-    Engineering: "bg-aurora-teal/10 text-aurora-teal",
-    Design: "bg-aurora-pink/10 text-aurora-pink",
-    Research: "bg-aurora-green/10 text-aurora-green",
-    Product: "bg-aurora-blue/10 text-aurora-blue",
-  };
-  return categoryMap[category] ?? "bg-aurora-green/10 text-aurora-green";
-}
-
-// Helper to format date
-function formatDate(dateString: string): string {
-  if (!dateString) {
-    return "Date unavailable";
-  }
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    return "Date unavailable";
-  }
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 }
 
 // Custom Portable Text components
