@@ -17,6 +17,21 @@ export const allProductsQuery = groq`
   }
 `;
 
+export const featuredProductsQuery = groq`
+  *[_type == "product"] | order(order asc) [0...3] {
+    _id,
+    name,
+    slug,
+    status,
+    description,
+    features,
+    tags,
+    accentColor,
+    image,
+    order
+  }
+`;
+
 export const productBySlugQuery = groq`
   *[_type == "product" && slug.current == $slug][0] {
     _id,
