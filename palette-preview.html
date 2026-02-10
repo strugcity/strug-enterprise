@@ -19,7 +19,7 @@
     margin-bottom: 8px;
   }
   .gradient-text {
-    background: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6, #ec4899);
+    background: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6, #d1287c);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -69,7 +69,7 @@
     transform: translateX(-50%);
     width: 600px;
     height: 400px;
-    background: radial-gradient(ellipse, rgba(0,232,123,0.08), rgba(0,212,255,0.05), transparent);
+    background: radial-gradient(ellipse, rgba(0,232,123,0.08), rgba(0,255,221,0.05), transparent);
     pointer-events: none;
   }
   .hero-mockup::after {
@@ -127,7 +127,7 @@
     position: relative;
   }
   .btn-primary {
-    background: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6);
+    background: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6);
     color: #060611;
     font-weight: 600;
     font-size: 14px;
@@ -157,8 +157,8 @@
     transition: all 0.2s;
   }
   .card:hover { background: rgba(28,28,48,0.8); }
-  .card-green { border: 1px solid rgba(0,232,123,0.3); box-shadow: 0 0 20px rgba(0,232,123,0.1); }
-  .card-teal { border: 1px solid rgba(0,212,255,0.3); box-shadow: 0 0 20px rgba(0,212,255,0.1); }
+  .card-pink { border: 1px solid rgba(209,40,124,0.3); box-shadow: 0 0 20px rgba(209,40,124,0.1); }
+  .card-teal { border: 1px solid rgba(0,255,221,0.3); box-shadow: 0 0 20px rgba(0,255,221,0.1); }
   .card-purple { border: 1px solid rgba(139,92,246,0.3); box-shadow: 0 0 20px rgba(139,92,246,0.1); }
   .card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
   .card p { font-size: 13px; color: #8888a0; line-height: 1.6; margin-bottom: 16px; }
@@ -169,8 +169,8 @@
     padding: 4px 12px;
     border-radius: 100px;
   }
-  .tag-green { background: rgba(0,232,123,0.1); color: #00e87b; }
-  .tag-teal { background: rgba(0,212,255,0.1); color: #00d4ff; }
+  .tag-pink { background: rgba(209,40,124,0.1); color: #d1287c; }
+  .tag-teal { background: rgba(0,255,221,0.1); color: #00ffdd; }
   .tag-purple { background: rgba(139,92,246,0.1); color: #8b5cf6; }
 
   /* Gradient divider */
@@ -223,14 +223,14 @@
         <span class="swatch-hex">#00e87b</span>
       </div>
       <div class="swatch">
-        <div class="swatch-color" style="background: #00d4ff;"></div>
+        <div class="swatch-color" style="background: #00ffdd;"></div>
         <span class="swatch-name">Teal</span>
-        <span class="swatch-hex">#00d4ff</span>
+        <span class="swatch-hex">#00ffdd</span>
       </div>
       <div class="swatch">
-        <div class="swatch-color" style="background: #3b82f6;"></div>
+        <div class="swatch-color" style="background: #2071f5;"></div>
         <span class="swatch-name">Blue</span>
-        <span class="swatch-hex">#3b82f6</span>
+        <span class="swatch-hex">#2071f5</span>
       </div>
       <div class="swatch">
         <div class="swatch-color" style="background: #8b5cf6;"></div>
@@ -238,14 +238,14 @@
         <span class="swatch-hex">#8b5cf6</span>
       </div>
       <div class="swatch">
-        <div class="swatch-color" style="background: #ec4899;"></div>
+        <div class="swatch-color" style="background: #d1287c;"></div>
         <span class="swatch-name">Pink</span>
-        <span class="swatch-hex">#ec4899</span>
+        <span class="swatch-hex">#d1287c</span>
       </div>
       <div class="swatch">
-        <div class="swatch-color" style="background: #06b6d4;"></div>
+        <div class="swatch-color" style="background: #23d1fc;"></div>
         <span class="swatch-name">Cyan</span>
-        <span class="swatch-hex">#06b6d4</span>
+        <span class="swatch-hex">#23d1fc</span>
       </div>
     </div>
   </div>
@@ -312,8 +312,8 @@
   <!-- Gradient -->
   <div class="section">
     <div class="section-title">Aurora Gradient</div>
-    <div style="height: 60px; border-radius: 16px; background: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6, #ec4899); margin-bottom: 12px;"></div>
-    <div style="height: 60px; border-radius: 16px; background: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6); margin-bottom: 12px;"></div>
+    <div style="height: 60px; border-radius: 16px; background: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6, #d1287c); margin-bottom: 12px;"></div>
+    <div style="height: 60px; border-radius: 16px; background: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6); margin-bottom: 12px;"></div>
     <p style="font-size: 12px; color: #55556a;">Top: Full aurora sweep (text gradients) &nbsp;|&nbsp; Bottom: Primary gradient (buttons, CTAs)</p>
   </div>
 
@@ -344,12 +344,12 @@
   <div class="section">
     <div class="section-title">Product Cards</div>
     <div class="cards">
-      <div class="card card-green">
+      <div class="card card-pink">
         <h3>Strug AI Platform</h3>
         <p>An intelligent automation platform that leverages AI agents to streamline engineering workflows.</p>
         <div class="tags">
-          <span class="tag tag-green">AI Agents</span>
-          <span class="tag tag-green">Automation</span>
+          <span class="tag tag-pink">AI Agents</span>
+          <span class="tag tag-pink">Automation</span>
         </div>
       </div>
       <div class="card card-teal">
@@ -385,8 +385,8 @@
     </div>
     <div class="stream-entry">
       <div class="stream-meta">
-        <span style="width:8px;height:8px;border-radius:50%;background:#00d4ff;"></span>
-        <span class="stream-type" style="background:rgba(0,212,255,0.1);color:#00d4ff;">release</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#00ffdd;"></span>
+        <span class="stream-type" style="background:rgba(0,255,221,0.1);color:#00ffdd;">release</span>
         <span class="stream-date">Feb 8, 2026 &middot; 2:30 PM</span>
       </div>
       <div class="stream-title">AI Platform v0.2 — Agent Orchestration</div>
