@@ -24,9 +24,13 @@ function getCategoryColor(category: BlogPost["category"]) {
 
 // Helper to format date like "Feb 10, 2026"
 function formatDate(dateString: string): string {
+  if (!dateString) {
+    return "Date unavailable";
+  }
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    return "Invalid Date";
+    console.warn(`Invalid date format received: ${dateString}`);
+    return "Date unavailable";
   }
   return date.toLocaleDateString("en-US", {
     month: "short",
