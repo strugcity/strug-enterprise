@@ -1,74 +1,51 @@
 import Link from "next/link";
+import { client } from "@/lib/sanity";
+import { allProductsQuery, latestStreamEntriesQuery } from "@/lib/queries";
+import type { Product, StreamEntry } from "@/lib/types";
 
-const featuredProducts = [
-  {
-    name: "Strug AI Platform",
-    description:
-      "An intelligent automation platform that leverages AI agents to streamline engineering workflows and boost productivity.",
-    tags: ["AI Agents", "Automation", "Platform"],
-    color: "aurora-pink" as const,
-    href: "/products",
-  },
-  {
-    name: "Aurora Analytics",
-    description:
-      "Real-time analytics and insights engine built for modern data pipelines. Visualize, analyze, and act on your data.",
-    tags: ["Analytics", "Data", "Real-time"],
-    color: "aurora-teal" as const,
-    href: "/products",
-  },
-  {
-    name: "NorthStar SDK",
-    description:
-      "A developer toolkit for building AI-native applications. Ship intelligent features faster with our composable SDK.",
-    tags: ["SDK", "Developer Tools", "Open Source"],
-    color: "aurora-purple" as const,
-    href: "/products",
-  },
-];
+// Helper to format date like "Feb 10, 2026"
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return "Invalid Date";
+  }
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
-const latestUpdates = [
-  {
-    date: "Feb 10, 2026",
-    title: "Strug City Website Launch",
-    description:
-      "Our brand new web presence is live! Explore our products, follow our progress, and connect with our team.",
-    type: "milestone",
-  },
-  {
-    date: "Feb 8, 2026",
-    title: "AI Platform v0.2 — Agent Orchestration",
-    description:
-      "New multi-agent orchestration capabilities added to the Strug AI Platform. Agents can now collaborate on complex tasks.",
-    type: "release",
-  },
-  {
-    date: "Feb 5, 2026",
-    title: "Aurora Analytics: Beta Program Open",
-    description:
-      "We're opening up our analytics engine to early adopters. Sign up for access to real-time data insights.",
-    type: "announcement",
-  },
-];
-
-const colorMap = {
+const colorMap: Record<Product["accentColor"], { border: string; glow: string; tag: string }> = {
   "aurora-pink": {
     border: "border-aurora-pink/30",
     glow: "glow-pink",
     tag: "bg-aurora-pink/10 text-aurora-pink",
-    dot: "bg-aurora-pink",
   },
   "aurora-teal": {
     border: "border-aurora-teal/30",
     glow: "glow-teal",
     tag: "bg-aurora-teal/10 text-aurora-teal",
-    dot: "bg-aurora-teal",
   },
   "aurora-purple": {
     border: "border-aurora-purple/30",
     glow: "glow-purple",
     tag: "bg-aurora-purple/10 text-aurora-purple",
-    dot: "bg-aurora-purple",
+  },
+  "aurora-blue": {
+    border: "border-aurora-blue/30",
+    glow: "glow-blue",
+    tag: "bg-aurora-blue/10 text-aurora-blue",
+  },
+  "aurora-green": {
+    border: "border-aurora-green/30",
+    glow: "glow-green",
+    tag: "bg-aurora-green/10 text-aurora-green",
+  },
+  "aurora-cyan": {
+    border: "border-aurora-cyan/30",
+    glow: "glow-cyan",
+    tag: "bg-aurora-cyan/10 text-aurora-cyan",
   },
 };
 
@@ -78,7 +55,23 @@ const typeStyles: Record<string, string> = {
   announcement: "bg-aurora-purple/10 text-aurora-purple",
 };
 
-export default function Home() {
+export default async function Home() {
+  let products: Product[] = [];
+  let streamEntries: StreamEntry[] = [];
+
+  // Fetch products and stream entries from Sanity
+  try {
+    [products, streamEntries] = await Promise.all([
+      client.fetch<Product[]>(allProductsQuery),
+      client.fetch<StreamEntry[]>(latestStreamEntriesQuery, { limit: 3 }),
+    ]);
+  } catch (error) {
+    console.error("Error fetching data from Sanity:", error);
+  }
+
+  // Limit products to first 3
+  const featuredProducts = products.slice(0, 3);
+
   return (
     <>
       {/* Hero Section */}
@@ -143,11 +136,11 @@ export default function Home() {
 
           <div className="grid gap-6 md:grid-cols-3">
             {featuredProducts.map((product) => {
-              const colors = colorMap[product.color];
+              const colors = colorMap[product.accentColor];
               return (
                 <Link
-                  key={product.name}
-                  href={product.href}
+                  key={product._id}
+                  href="/products"
                   className={`group rounded-2xl border ${colors.border} bg-card/50 p-8 transition-all hover:bg-card-hover/50 ${colors.glow}`}
                 >
                   <h3 className="text-xl font-semibold text-text-primary group-hover:text-white">
@@ -206,26 +199,28 @@ export default function Home() {
           </div>
 
           <div className="mx-auto max-w-3xl space-y-6">
-            {latestUpdates.map((update) => (
+            {streamEntries.map((entry) => (
               <div
-                key={update.title}
+                key={entry._id}
                 className="glass-card rounded-2xl p-6 transition-all"
               >
                 <div className="flex items-center gap-3">
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      typeStyles[update.type] ?? ""
+                      typeStyles[entry.type] ?? ""
                     }`}
                   >
-                    {update.type}
+                    {entry.type}
                   </span>
-                  <span className="text-xs text-text-muted">{update.date}</span>
+                  <span className="text-xs text-text-muted">
+                    {formatDate(entry.publishedAt)}
+                  </span>
                 </div>
                 <h3 className="mt-3 text-lg font-semibold text-text-primary">
-                  {update.title}
+                  {entry.title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                  {update.description}
+                  {entry.description}
                 </p>
               </div>
             ))}
