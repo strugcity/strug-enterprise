@@ -1,0 +1,31 @@
+name: Cleanup Duplicate Issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "cleanup" to close duplicate issues #3–#27'
+        required: true
+        default: ''
+
+permissions:
+  issues: write
+
+jobs:
+  cleanup:
+    if: github.event.inputs.confirm == 'cleanup'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close duplicate issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Closing duplicate issues #3 through #27..."
+          for i in $(seq 3 27); do
+            gh issue close "$i" --repo ${{ github.repository }} \
+              --comment "Closing duplicate — kept issue #$((i + 25)) instead." \
+              2>/dev/null && echo "  Closed #$i" || echo "  Skipped #$i"
+          done
+          echo ""
+          OPEN=$(gh issue list --repo ${{ github.repository }} --state open --json number -q 'length')
+          echo "✅ Done. $OPEN issues remaining."
