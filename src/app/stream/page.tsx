@@ -12,6 +12,9 @@ export const metadata: Metadata = {
 // Helper to format date like "Feb 10, 2026"
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return "Invalid Date";
+  }
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -22,6 +25,9 @@ function formatDate(dateString: string): string {
 // Helper to format time like "4:00 PM"
 function formatTime(dateString: string): string {
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return "--:--";
+  }
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -46,7 +52,10 @@ function groupEntriesByDate(entries: StreamEntry[]) {
     if (!grouped.has(dateKey)) {
       grouped.set(dateKey, { date: formattedDate, entries: [] });
     }
-    grouped.get(dateKey)!.entries.push(entry);
+    const group = grouped.get(dateKey);
+    if (group) {
+      group.entries.push(entry);
+    }
   });
   
   // Convert to array and sort by date (newest first)
