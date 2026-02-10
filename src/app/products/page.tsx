@@ -18,39 +18,46 @@ function getColorClasses(accentColor: Product["accentColor"]) {
       borderClass: "border-aurora-pink/30",
       tagClass: "bg-aurora-pink/10 text-aurora-pink",
       statusClass: "bg-aurora-pink/10 text-aurora-pink",
+      iconClass: "text-aurora-pink",
     },
     "aurora-teal": {
       glowClass: "glow-teal",
       borderClass: "border-aurora-teal/30",
       tagClass: "bg-aurora-teal/10 text-aurora-teal",
       statusClass: "bg-aurora-teal/10 text-aurora-teal",
+      iconClass: "text-aurora-teal",
     },
     "aurora-purple": {
       glowClass: "glow-purple",
       borderClass: "border-aurora-purple/30",
       tagClass: "bg-aurora-purple/10 text-aurora-purple",
       statusClass: "bg-aurora-purple/10 text-aurora-purple",
+      iconClass: "text-aurora-purple",
     },
     "aurora-blue": {
       glowClass: "glow-blue",
       borderClass: "border-aurora-blue/30",
       tagClass: "bg-aurora-blue/10 text-aurora-blue",
       statusClass: "bg-aurora-blue/10 text-aurora-blue",
+      iconClass: "text-aurora-blue",
     },
     "aurora-green": {
       glowClass: "glow-green",
       borderClass: "border-aurora-green/30",
       tagClass: "bg-aurora-green/10 text-aurora-green",
       statusClass: "bg-aurora-green/10 text-aurora-green",
+      iconClass: "text-aurora-green",
     },
     "aurora-cyan": {
       glowClass: "glow-cyan",
       borderClass: "border-aurora-cyan/30",
       tagClass: "bg-aurora-cyan/10 text-aurora-cyan",
       statusClass: "bg-aurora-cyan/10 text-aurora-cyan",
+      iconClass: "text-aurora-cyan",
     },
   };
-  return colorMap[accentColor];
+  // Fallback to aurora-green if color not found
+  return colorMap[accentColor] ?? colorMap["aurora-green"];
 }
 
 export default async function ProductsPage() {
@@ -135,7 +142,7 @@ export default async function ProductsPage() {
                                 height="16"
                                 viewBox="0 0 16 16"
                                 fill="none"
-                                className={`shrink-0 text-${product.accentColor}`}
+                                className={`shrink-0 ${colorClasses.iconClass}`}
                               >
                                 <path
                                   d="M4 8l3 3 5-6"
