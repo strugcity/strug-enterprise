@@ -6,7 +6,7 @@ const featuredProducts = [
     description:
       "An intelligent automation platform that leverages AI agents to streamline engineering workflows and boost productivity.",
     tags: ["AI Agents", "Automation", "Platform"],
-    color: "aurora-green" as const,
+    color: "aurora-pink" as const,
     href: "/products",
   },
   {
@@ -52,11 +52,11 @@ const latestUpdates = [
 ];
 
 const colorMap = {
-  "aurora-green": {
-    border: "border-aurora-green/30",
-    glow: "glow-green",
-    tag: "bg-aurora-green/10 text-aurora-green",
-    dot: "bg-aurora-green",
+  "aurora-pink": {
+    border: "border-aurora-pink/30",
+    glow: "glow-pink",
+    tag: "bg-aurora-pink/10 text-aurora-pink",
+    dot: "bg-aurora-pink",
   },
   "aurora-teal": {
     border: "border-aurora-teal/30",

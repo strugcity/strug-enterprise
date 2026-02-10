@@ -9,11 +9,11 @@
   --color-border-glow: #3b3b5c;
 
   --color-aurora-green: #00e87b;
-  --color-aurora-teal: #00d4ff;
-  --color-aurora-blue: #3b82f6;
+  --color-aurora-teal: #00ffdd;
+  --color-aurora-blue: #2071f5;
   --color-aurora-purple: #8b5cf6;
-  --color-aurora-pink: #ec4899;
-  --color-aurora-cyan: #06b6d4;
+  --color-aurora-pink: #d1287c;
+  --color-aurora-cyan: #23d1fc;
 
   --color-text-primary: #f0f0f5;
   --color-text-secondary: #8888a0;
@@ -31,18 +31,18 @@ body {
 
 /* Aurora gradient utilities */
 .aurora-gradient-text {
-  background: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6, #d1287c);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .aurora-gradient-bg {
-  background: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6);
+  background: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6);
 }
 
 .aurora-gradient-border {
-  border-image: linear-gradient(135deg, #00e87b, #00d4ff, #8b5cf6, #ec4899) 1;
+  border-image: linear-gradient(135deg, #00e87b, #00ffdd, #8b5cf6, #d1287c) 1;
 }
 
 /* Glow effects */
@@ -51,7 +51,11 @@ body {
 }
 
 .glow-teal {
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.15), 0 0 60px rgba(0, 212, 255, 0.05);
+  box-shadow: 0 0 20px rgba(0, 255, 221, 0.15), 0 0 60px rgba(0, 255, 221, 0.05);
+}
+
+.glow-pink {
+  box-shadow: 0 0 20px rgba(209, 40, 124, 0.15), 0 0 60px rgba(209, 40, 124, 0.05);
 }
 
 .glow-purple {
@@ -72,9 +76,9 @@ body {
   background: linear-gradient(
     135deg,
     rgba(0, 232, 123, 0.08),
-    rgba(0, 212, 255, 0.08),
+    rgba(0, 255, 221, 0.08),
     rgba(139, 92, 246, 0.08),
-    rgba(236, 72, 153, 0.08),
+    rgba(209, 40, 124, 0.08),
     rgba(0, 232, 123, 0.08)
   );
   background-size: 400% 400%;
