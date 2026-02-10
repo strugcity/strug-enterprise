@@ -3,41 +3,13 @@ import Link from "next/link";
 import { client } from "@/lib/sanity";
 import { allBlogPostsQuery } from "@/lib/queries";
 import type { BlogPost } from "@/lib/types";
+import { getCategoryColor, formatDate } from "@/lib/blog-utils";
 
 export const metadata: Metadata = {
   title: "Blog — Strug City",
   description:
     "Articles, insights, and deep dives from the Strug City engineering team.",
 };
-
-// Map category to CSS classes
-function getCategoryColor(category: BlogPost["category"]) {
-  const categoryMap = {
-    Company: "bg-aurora-purple/10 text-aurora-purple",
-    Engineering: "bg-aurora-teal/10 text-aurora-teal",
-    Design: "bg-aurora-pink/10 text-aurora-pink",
-    Research: "bg-aurora-green/10 text-aurora-green",
-    Product: "bg-aurora-blue/10 text-aurora-blue",
-  };
-  return categoryMap[category] ?? "bg-aurora-green/10 text-aurora-green";
-}
-
-// Helper to format date like "Feb 10, 2026"
-function formatDate(dateString: string): string {
-  if (!dateString) {
-    return "Date unavailable";
-  }
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    console.warn(`Invalid date format received: ${dateString}`);
-    return "Date unavailable";
-  }
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export default async function BlogPage() {
   let blogPosts: BlogPost[] = [];
