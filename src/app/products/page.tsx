@@ -61,7 +61,15 @@ function getColorClasses(accentColor: Product["accentColor"]) {
 }
 
 export default async function ProductsPage() {
-  const products: Product[] = await client.fetch(allProductsQuery);
+  let products: Product[] = [];
+  let fetchError = false;
+  
+  try {
+    products = await client.fetch(allProductsQuery);
+  } catch (error) {
+    console.error("Error fetching products from Sanity:", error);
+    fetchError = true;
+  }
   return (
     <>
       {/* Header */}
@@ -86,10 +94,12 @@ export default async function ProductsPage() {
       {/* Product Cards */}
       <section className="py-16 md:py-24" id="featured">
         <div className="mx-auto max-w-7xl px-6">
-          {products.length === 0 ? (
+          {fetchError || products.length === 0 ? (
             <div className="rounded-2xl border border-border bg-card/50 p-12 text-center">
               <p className="text-lg text-text-secondary">
-                No products available at the moment. Check back soon!
+                {fetchError
+                  ? "Unable to load products at the moment. Please try again later."
+                  : "No products available at the moment. Check back soon!"}
               </p>
             </div>
           ) : (
