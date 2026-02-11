@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "tsx scripts/seed-sanity.ts"
   },
   "dependencies": {
     "@portabletext/react": "^6.0.2",
+    "@sanity/client": "^7.14.1",
     "@sanity/code-input": "^7.0.8",
     "@sanity/image-url": "^2.0.3",
     "next": "16.1.6",
@@ -27,6 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
