@@ -17,6 +17,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Strug City Blog"
+          href="/feed.xml"
+        />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Strug City Progress Stream"
+          href="/stream/feed.xml"
+        />
+      </head>
       <body className="antialiased">
         <Navbar />
         <main className="min-h-screen pt-[73px]">{children}</main>
