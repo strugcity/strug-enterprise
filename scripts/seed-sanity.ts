@@ -131,7 +131,17 @@ const products = [
 /**
  * Stream Entry Seed Data
  */
-const streamEntries = [
+const streamEntries: Array<{
+  _id: string;
+  _type: string;
+  title: string;
+  description: string;
+  type: string;
+  tags: string[];
+  publishedAt: string;
+  source: string;
+  sourceUrl?: string;
+}> = [
   {
     _id: generateId("streamEntry", "launch-announcement"),
     _type: "streamEntry",
