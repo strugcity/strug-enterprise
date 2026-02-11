@@ -33,11 +33,24 @@ export async function generateMetadata({
   return {
     title: `${post.title} — Strug City`,
     description: post.excerpt,
-    openGraph: post.coverImage
-      ? {
-          images: [urlFor(post.coverImage).width(1200).height(630).url()],
-        }
-      : undefined,
+    openGraph: {
+      type: "article",
+      publishedTime: post.publishedAt,
+      authors: ["Strug City"],
+      title: post.title,
+      description: post.excerpt,
+      images: post.coverImage
+        ? [urlFor(post.coverImage).width(1200).height(630).url()]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: post.coverImage
+        ? [urlFor(post.coverImage).width(1200).height(630).url()]
+        : undefined,
+    },
   };
 }
 
