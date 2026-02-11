@@ -32,3 +32,43 @@ Open [http://localhost:3000](http://localhost:3000) to view the site.
 npm run build
 npm start
 ```
+
+## Content Management (Sanity CMS)
+
+This project uses [Sanity](https://www.sanity.io/) as a headless CMS for managing content.
+
+### Environment Variables
+
+Create a `.env.local` file with:
+
+```bash
+NEXT_PUBLIC_SANITY_PROJECT_ID=ktfgvv39
+NEXT_PUBLIC_SANITY_DATASET=production
+
+# Required for write operations and seeding
+SANITY_API_TOKEN=your_token_here
+```
+
+Generate an API token at: https://www.sanity.io/manage/project/ktfgvv39/api#tokens
+
+### Seeding Data
+
+To populate Sanity with initial content (4 products, 20+ stream entries, 5 blog posts):
+
+```bash
+npm run seed
+```
+
+The seed script is **idempotent** — it can be run multiple times without creating duplicates. It will skip any documents that already exist.
+
+**What gets seeded:**
+- 4 products (Strug AI Platform, Aurora Analytics, NorthStar SDK, Glacier DB)
+- 20+ stream entries with varied types (milestone, release, engineering, research, announcement)
+- 5 blog posts with rich Portable Text bodies
+
+### Content Schemas
+
+Content types are defined in `src/sanity/schemas/`:
+- `product.ts` — Product portfolio items
+- `streamEntry.ts` — Progress stream updates
+- `blogPost.ts` — Blog articles with Portable Text
