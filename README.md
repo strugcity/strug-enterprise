@@ -72,3 +72,12 @@ Content types are defined in `src/sanity/schemas/`:
 - `product.ts` — Product portfolio items
 - `streamEntry.ts` — Progress stream updates
 - `blogPost.ts` — Blog articles with Portable Text
+
+## Deployment
+
+See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for complete deployment instructions including:
+- Environment variable configuration
+- Preview vs production setup
+- Custom domain configuration
+- Automatic redeployment on content changes
+- Troubleshooting common deployment issues
